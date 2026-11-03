@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>هاتف الطفل - محاكي الرقابة</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #eef2f3; text-align: center; padding-top: 15px; }
+        .box { background: white; max-width: 420px; margin: auto; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h2 { color: #28a745; font-size: 18px; }
+        .section-box { margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px; text-align: right; }
+        input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; margin-top: 8px; width: 100%; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        .sos-btn { background: #dc3545; }
+        .sos-btn:hover { background: #bd2130; }
+        video { width: 100%; max-width: 300px; background: black; border-radius: 6px; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>📱 واجهة هاتف الطفل</h2>
+        <p id="status" style="font-size: 13px; color: #666;">جاري الاتصال بالخادم...</p>
+
+        <!-- 1. زر الطوارئ SOS -->
+        <button class="sos-btn" onclick="sendSOS()">🆘 طلب نجدة طارئ (SOS)</button>
+
+        <!-- 2. محاكاة أمان المتصفح (موقع إلكتروني يزوره الطفل) -->
+        <div class="section-box">
+            <label style="font-size: 12px; font-weight: bold; color: #333;">🌐 محاكاة زيارة موقع إلكتروني (أمان المتصفح):</label>
+            <input type="text" id="browserUrl" placeholder="مثال: https://youtube.com">
+            <button onclick="simulateBrowserVisit()">تسجيل زيارة الموقع</button>
+        </div>
+
+        <!-- 3. محاكاة إشعار وسائل التواصل الاجتماعي -->
+        <div class="section-box">
+            <label style="font-size: 12px; font-weight: bold; color: #333;">💬 محاكاة رسالة سوشيال ميديا (واتساب / تيكتوك):</label>
+            <input type="text" id="socialMsg" placeholder="محتوى الرسالة الواردة...">
+            <button onclick="simulateSocialMessage()" style="background: #28a745;">إرسال إشعار تواصل اجتماعي</button>
+        </div>
+
+        <video id="localVideo" autoplay playsinline muted></video>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const statusP = document.getElementById('status');
+        const localVideo = document.getElementById('localVideo');
+        let peerConnection;
+        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+        socket.on('connect', () => {
+            statusP.innerText = "متصل بالخادم بنجاح وجاهز للبث!";
+            socket.emit('register', { role: 'child', childName: 'محمد (ابني)' });
+        });
+
+        function sendSOS() {
+            socket.emit('send_alert_to_parent', {
+                childName: 'محمد (ابني)',
+                message: '🚨 تنبيه طارئ! الطفل يطلب المساعدة الآن!',
+                type: 'sos'
+            });
+            alert("تم إرسال تنبيه الطوارئ لوالدك!");
+        }
+
+        function simulateBrowserVisit() {
+            const urlInput = document.getElementById('browserUrl');
+            if (urlInput.value.trim() === '') return;
+            
+            socket.emit('send_alert_to_parent', {
+                childName: 'محمد (ابني)',
+                message: `🌐 [أمان المتصفح] زيارة موقع جديد: ${urlInput.value}`,
+                type: 'browser'
+            });
+            alert("تم تسجيل زيارة الموقع وإرسالها للوحة الأب!");
+            urlInput.value = '';
+        }
+
+        function simulateSocialMessage() {
+            const msgInput = document.getElementById('socialMsg');
+            if (msgInput.value.trim() === '') return;
+            
+            socket.emit('send_alert_to_parent', {
+                childName: 'محمد (ابني)',
+                message: `💬 [إشعار وسائل التواصل]: ${msgInput.value}`,
+                type: 'social'
+            });
+            alert("تم توجيه رسالة وسائل التواصل للوحة تحكم الأب!");
+            msgInput.value = '';
+        }
+
+        // استقبال أوامر المراقبة الحية من الأب
+        socket.on('execute_command', async (data) => {
+            try {
+                let stream;
+                if (data.action === 'share_screen') {
+                    stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+                } else if (data.action === 'front_camera') {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true });
+                } else if (data.action === 'back_camera') {
+                    try {
+                        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: 'environment' } }, audio: true });
+                    } catch (e) {
+                        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                    }
+                } else if (data.action === 'listen_mic') {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+                }
+
+                if (stream) {
+                    localVideo.style.display = data.action === 'listen_mic' ? 'none' : 'block';
+                    localVideo.srcObject = stream;
+
+                    peerConnection = new RTCPeerConnection(rtcConfig);
+                    stream.getTracks().forEach(track => peerConnection.addTrack(track, stream));
+                    peerConnection.onicecandidate = (event) => {
+                        if (event.candidate) {
+                            socket.emit('webrtc_ice_candidate', { targetId: data.parentId, candidate: event.candidate });
+                        }
+                    };
+
+                    const offer = await peerConnection.createOffer();
+                    await peerConnection.setLocalDescription(offer);
+                    socket.emit('webrtc_offer', { targetId: data.parentId, senderId: socket.id, offer: offer });
+                }
+            } catch (err) {
+                alert("خطأ في تشغيل الجهاز: " + err);
+            }
+        });
+
+        socket.on('webrtc_answer', async (data) => {
+            if (peerConnection) { await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer)); }
+        });
+
+        socket.on('webrtc_ice_candidate', async (data) => {
+            if (peerConnection) { await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); }
+        });
+    </script>
+</body>
+</html>
