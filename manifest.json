@@ -8,7 +8,7 @@
   "theme_color": "#007bff",
   "icons": [
     {
-      "src": "https://www.pwabuilder.com/assets/images/icon-512.png",
+      "src": "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f4f1.png",
       "sizes": "512x512",
       "type": "image/png"
     }
