@@ -5,12 +5,13 @@
   "start_url": "/child.html",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#007bff",
+  "theme_color": "#12ff00",
   "icons": [
     {
-      "src": "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f4f1.png",
+      "src": "https://www.pwabuilder.com/assets/images/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "id": "/child.html"
 }
