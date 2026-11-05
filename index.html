@@ -3,171 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم الرقابة الأبوية - FlashGet Style</title>
+    <title>لوحة تحكم الأب - FlashGet Style</title>
     <style>
-        body { font-family: Tahoma, sans-serif; background-color: #f0f2f5; margin: 0; padding: 15px; direction: rtl; }
+        body { font-family: Tahoma, sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; }
         .container { max-width: 950px; margin: auto; }
         
-        /* شريط علوي يحاكي تطبيق الهاتف */
-        .header-bar { background: linear-gradient(135deg, #6f42c1, #4e2a84); color: white; padding: 15px 20px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-bottom: 20px; }
+        .header-bar { background: linear-gradient(135deg, #6f42c1, #4e2a84); color: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .header-bar h2 { margin: 0; font-size: 18px; }
         .device-status-badge { background: rgba(255,255,255,0.2); padding: 5px 12px; border-radius: 20px; font-size: 13px; }
 
-        /* البطاقات المنظمة */
         .card { background: white; padding: 15px 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; }
-        .card h3 { margin-top: 0; color: #333; font-size: 16px; border-bottom: 2px solid #f0f2f5; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .card h3 { margin-top: 0; color: #333; font-size: 16px; border-bottom: 2px solid #f0f2f5; padding-bottom: 8px; }
 
-        /* الأزرار */
-        button { background: #6f42c1; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; margin: 5px 3px; font-size: 13px; font-weight: bold; transition: 0.2s; }
+        button { background: #6f42c1; color: white; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         button:hover { background: #5a329e; }
         .btn-danger { background: #dc3545; }
         .btn-danger:hover { background: #bd2130; }
         .btn-info { background: #17a2b8; }
         .btn-info:hover { background: #117a8b; }
 
-        /* منطقة السجلات والإشعارات */
         .log-list { max-height: 180px; overflow-y: auto; background: #fafbfc; border: 1px solid #e1e4e8; border-radius: 8px; padding: 10px; }
-        .log-item { background: white; padding: 8px 12px; margin-bottom: 6px; border-radius: 6px; border-right: 4px solid #6f42c1; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
+        .log-item { background: white; padding: 8px 12px; margin-bottom: 6px; border-radius: 6px; border-right: 4px solid #6f42c1; font-size: 13px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .log-browser { border-right-color: #007bff; }
         .log-social { border-right-color: #28a745; }
         .log-sos { border-right-color: #dc3545; background: #fff5f5; color: #c53030; font-weight: bold; }
 
-        video { width: 100%; max-width: 500px; background: black; border-radius: 8px; margin-top: 10px; display: block; border: 2px solid #ddd; }
+        video { width: 100%; max-width: 500px; background: black; border-radius: 8px; margin-top: 10px; display: block; margin-left: auto; margin-right: auto; }
         ul { padding-right: 20px; margin: 5px 0; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <!-- شريط معلومات الجهاز المتصل -->
-        <div class="header-bar">
-            <div>
-                <h2>📱 لوحة تحكم الأب (مراقبة الطفل)</h2>
-                <div id="connectionStatus" style="font-size: 12px; margin-top: 5px;">جاري الاتصال بالخادم...</div>
-            </div>
-            <div class="device-badge">
-                <span class="device-status-badge" id="activeDeviceCount">الأجهزة المتصلة: 0</span>
-            </div>
-        </div>
+<div class="container">
 
-        <!-- قائمة الأجهزة المتصلة -->
-        <div class="card">
-            <h3>🔗 الأجهزة المتاحة للمراقبة</h3>
-            <ul id="childList" style="list-style: none; padding: 0;">
-                <li style="color: #666; font-style: italic;">لا توجد أجهزة متصلة حالياً...</li>
-            </ul>
+    <div class="header-bar">
+        <div>
+            <h2>📱 لوحة تحكم الأب (مراقبة الطفل)</h2>
+            <div id="connectionStatus" style="font-size: 12px; margin-top: 5px;">جاري الاتصال بالخادم...</div>
         </div>
-
-        <!-- قسم الإشعارات وسجلات الأنشطة (محاكي لتبويب الإشعارات في FlashGet) -->
-        <div class="card">
-            <h3>🔔 سجل النشاطات الحية (المتصفح، السوشيال ميديا، الطوارئ)</h3>
-            <div class="log-list" id="alertsList">
-                <div style="color: #888; text-align: center; padding: 20px; font-style: italic;">لا توجد تنبيهات جديدة مسجلة حتى الآن...</div>
-            </div>
-        </div>
-
-        <!-- قسم المراقبة الحية (شاشة، كاميرا، صوت) -->
-        <div class="card">
-            <h3>👁️ المراقبة المباشرة (Live Monitoring)</h3>
-            <div>
-                <button onclick="sendCommand('share_screen')">📱 عرض شاشة الطفل</button>
-                <button onclick="sendCommand('front_camera')" class="btn-info">📷 الكاميرا الأمامية</button>
-                <button onclick="sendCommand('back_camera')" class="btn-info">📸 الكاميرا الخلفية</button>
-                <button onclick="sendCommand('listen_mic')" class="btn-danger">🎙️ الاستماع للمحيط</button>
-            </div>
-            <div>
-                <video id="remoteVideo" autoplay playsinline controls></video>
-            </div>
+        <div class="device-badge">
+            <span class="device-status-badge" id="activeDeviceCount">الأجهزة المتصلة: 0</span>
         </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        let selectedChildId = null;
-        let peerConnection;
-        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+    <div class="card">
+        <h3>🔗 الأجهزة المتاحة للمراقبة</h3>
+        <ul id="childlist" style="list-style: none; padding: 0;">
+            <li style="color: #666; font-style: italic;">لا توجد أجهزة متصلة حالياً...</li>
+        </ul>
+    </div>
 
-        const statusDiv = document.getElementById('connectionStatus');
-        const childListUl = document.getElementById('childList');
-        const remoteVideo = document.getElementById('remoteVideo');
-        const alertsList = document.getElementById('alertsList');
-        const activeDeviceCount = document.getElementById('activeDeviceCount');
+    <div class="card">
+        <h3>🔔 سجل النشاطات الحية (المتصفح، السوشيال ميديا، الطوارئ)</h3>
+        <div class="log-list" id="alertsList">
+            <div style="color: #888; text-align: center; padding: 20px; font-style: italic;">لا توجد تنبيهات جديدة مسجلة حتى الآن...</div>
+        </div>
+    </div>
 
-        socket.on('connect', () => {
-            statusDiv.style.color = "#d4edda";
-            statusDiv.innerText = "متصل بالخادم بنجاح ومستعد للتتبع!";
-            socket.emit('register', { role: 'parent' });
-        });
+    <div class="card">
+        <h3>👁️ المراقبة المباشرة (Live Monitoring)</h3>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 10px;">
+            <button onclick="sendCommand('share_screen')">💻 عرض شاشة الطفل</button>
+            <button onclick="sendCommand('front_camera')" class="btn-info">📷 الكاميرا الأمامية</button>
+            <button onclick="sendCommand('back_camera')" class="btn-info">📷 الكاميرا الخلفية</button>
+            <button onclick="sendCommand('listen_mic')" class="btn-danger">🎙️ الاستماع للمحيط</button>
+        </div>
+        <div>
+            <video id="remoteVideo" autoplay playsinline controls></video>
+        </div>
+    </div>
 
-        socket.on('child_list_updated', (children) => {
-            childListUl.innerHTML = '';
-            activeDeviceCount.innerText = `الأجهزة المتصلة: ${children.length}`;
-            if (children.length === 0) {
-                childListUl.innerHTML = '<li style="color: #666; font-style: italic;">لا توجد أجهزة أطفال متصلة حالياً...</li>';
-                return;
-            }
-            children.forEach(child => {
-                let li = document.createElement('li');
-                li.style.cssText = "padding: 8px; background: #f8f9fa; margin-bottom: 5px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;";
-                li.innerHTML = `<span><b>${child.name}</b> (المعرف: ${child.id})</span> <button onclick="selectChild('${child.id}')">اختيار للمراقبة</button>`;
-                childListUl.appendChild(li);
-            });
-        });
+</div>
 
-        function selectChild(id) {
-            selectedChildId = id;
-            alert("تم تحديد جهاز الطفل بنجاح للمراقبة المباشرة!");
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    const statusDiv = document.getElementById('connectionStatus');
+    const childListUl = document.getElementById('childlist');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const alertsList = document.getElementById('alertsList');
+    const activeDeviceCount = document.getElementById('activeDeviceCount');
+    
+    let selectedChildId = null;
+    let peerConnection;
+    const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+    socket.on('connect', () => {
+        statusDiv.style.color = "#d4edda";
+        statusDiv.innerText = "متصل بالخادم بنجاح ومستعد للتتبع!";
+        socket.emit('register', { role: 'parent' });
+    });
+
+    socket.on('child_list_updated', (children) => {
+        childListUl.innerHTML = '';
+        activeDeviceCount.innerText = `الأجهزة المتصلة: ${children.length}`;
+        if (children.length === 0) {
+            childListUl.innerHTML = '<li style="color: #666; font-style: italic;">لا توجد أجهزة متصلة حالياً...</li>';
+            return;
         }
+        children.forEach(child => {
+            let li = document.createElement('li');
+            li.style.cssText = "padding: 8px; background: #f8f9fa; margin-bottom: 5px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;";
+            li.innerHTML = `<span><b>${child.name}</b> (المعرف: ${child.id})</span> <button onclick="selectChild('${child.id}')" style="padding: 5px 10px; font-size: 12px;">اختيار للمراقبة</button>`;
+            childListUl.appendChild(li);
+        });
+    });
 
-        function sendCommand(action) {
-            if (!selectedChildId) {
-                alert("الرجاء اختيار جهاز طفل أولاً من قائمة الأجهزة المتاحة!");
-                return;
-            }
-            socket.emit('parent_command', {
-                targetChildId: selectedChildId,
-                action: action,
-                parentId: socket.id
-            });
-            alert("تم إرسال أمر المراقبة بنجاح!");
+    function selectChild(id) {
+        selectedChildId = id;
+        alert("تم تحديد جهاز الطفل بنجاح للمراقبة المباشرة!");
+    }
+
+    function sendCommand(action) {
+        if (!selectedChildId) {
+            alert("الرجاء اختيار جهاز طفل أولاً من قائمة الأجهزة المتاحة!");
+            return;
         }
+        socket.emit('parent_command', {
+            targetChildId: selectedChildId,
+            action: action,
+            parentId: socket.id
+        });
+        alert("تم إرسال أمر المراقبة بنجاح!");
+    }
 
-        // استقبال التنبيهات والسجلات (متصفح، تواصل اجتماعي، SOS)
-        socket.on('new_alert_received', (data) => {
-            if (alertsList.innerHTML.includes('لا توجد تنبيهات')) {
-                alertsList.innerHTML = '';
+    socket.on('new_alert_received', (data) => {
+        if (alertsList.innerHTML.includes('لا توجد تنبيهات')) {
+            alertsList.innerHTML = '';
+        }
+        
+        const alertDiv = document.createElement('div');
+        let cssClass = 'log-item';
+        if (data.type === 'sos') cssClass = 'log-item log-sos';
+        else if (data.type === 'browser') cssClass = 'log-item log-browser';
+        else if (data.type === 'social') cssClass = 'log-item log-social';
+
+        alertDiv.className = cssClass;
+        alertDiv.innerHTML = `<span>[${data.time}] <b>${data.senderName}:</b> ${data.message}</span>`;
+        alertsList.prepend(alertDiv);
+    });
+
+    socket.on('webrtc_offer', async (data) => {
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        
+        peerConnection.ontrack = (event) => {
+            if (remoteVideo && event.streams[0]) {
+                remoteVideo.srcObject = event.streams[0];
             }
+        };
 
-            const alertDiv = document.createElement('div');
-            let cssClass = 'log-item';
-            if (data.type === 'sos') cssClass = 'log-item log-sos';
-            else if (data.type === 'browser') cssClass = 'log-item log-browser';
-            else if (data.type === 'social') cssClass = 'log-item log-social';
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                socket.emit('webrtc_ice_candidate', { targetId: data.senderId, candidate: event.candidate });
+            }
+        };
 
-            alertDiv.className = cssClass;
-            alertDiv.innerHTML = `<span>[${data.time}] <b>${data.senderName}:</b> ${data.message}</span>`;
-            alertsList.prepend(alertDiv);
-        });
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.emit('webrtc_answer', { targetId: data.senderId, answer: answer });
+    });
 
-        // WebRTC logic لعرض البث
-        socket.on('webrtc_offer', async (data) => {
-            peerConnection = new RTCPeerConnection(rtcConfig);
-            peerConnection.ontrack = (event) => { remoteVideo.srcObject = event.streams[0]; };
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit('webrtc_ice_candidate', { targetId: data.senderId, candidate: event.candidate });
-                }
-            };
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-            const answer = await peerConnection.createAnswer();
-            await peerConnection.setLocalDescription(answer);
-            socket.emit('webrtc_answer', { targetId: data.senderId, answer: answer });
-        });
-
-        socket.on('webrtc_ice_candidate', async (data) => {
-            if (peerConnection) { await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); }
-        });
-    </script>
+    socket.on('webrtc_ice_candidate', async (data) => {
+        if (peerConnection) {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+        }
+    });
+</script>
 </body>
 </html>
