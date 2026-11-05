@@ -144,11 +144,17 @@
     });
 
     socket.on('webrtc_offer', async (data) => {
+        if (peerConnection) {
+            peerConnection.close();
+        }
+
         peerConnection = new RTCPeerConnection(rtcConfig);
         
         peerConnection.ontrack = (event) => {
             if (remoteVideo && event.streams[0]) {
                 remoteVideo.srcObject = event.streams[0];
+                remoteVideo.muted = false; // تفعيل الصوت
+                remoteVideo.play().catch(e => console.log("Audio play error:", e));
             }
         };
 
